@@ -84,7 +84,7 @@ contract NFT is ERC721URIStorage {
     
     function createMarketSale(uint tokenId) public payable {
       uint price = MarketItems[tokenId].price;
-      require(msg.value == price, "Please send asking amount price");
+      require(msg.value == price, "Please send the asking price amount");
 
       // Transfer the "NFT listing" from marketplace contract to buyer
       MarketItems[tokenId].owner = payable(msg.sender);
@@ -104,4 +104,92 @@ contract NFT is ERC721URIStorage {
       // Tranfer the NFT listing fee to marketplace owner
       payable(owner).transfer(listingPrice);
     }
+
+    // GETTER FUNCTIONS
+    
+    function getMarketItems() public view returns(MarketItem[] memory) {
+      uint totalItems = _tokenId.current();
+      uint unsoldMarketItemCount = _tokenId.current() - _itemsSold.current();
+      uint counter = 0; //for tracking array current index
+
+      // Unsold market items arr temp storage to be returned
+      MarketItem[] memory items = new MarketItem[](unsoldMarketItemCount);
+    
+      for (uint i = 0; i < totalItems; i++) {
+        // Check if item is unsold, the NFT is owned by marketplace temporarily
+        if(MarketItems[i+1].owner == address(this)) {
+          // Add the unsold Item to array
+          items[counter] = MarketItems[i+1];
+          counter += 1;
+        }
+      }
+      return items;
+    }
+
+  // Fetch unlisted NFTs user owned(bought)
+  function getNFTOwned() public view returns(MarketItem[] memory) {
+    uint totalItems = _tokenId.current();
+    uint itemsOwned = 0;
+    uint counter = 0;
+
+    // Count the number of unlisted NFT of owner
+    for(uint i = 0; i < totalItems; i++) {
+      if(MarketItems[i+1].owner == msg.sender) {
+        itemsOwned += 1;
+      }
+    }
+
+    MarketItem[] memory items = new MarketItem[](itemsOwned);
+    
+    for (uint i = 0; i < totalItems; i++) {
+      // Check if the user is the owner of NFT
+      if(MarketItems[i+1].owner == msg.sender){
+        items[counter] = MarketItems[i+1];
+        counter += 1;
+      }
+    }
+
+    return items;
+  }
+
+  // Fetch user NFTs(selling)
+  function getNFTOwnedListed() public view returns(MarketItem[] memory) {
+    uint totalItems = _tokenId.current();
+    uint itemsOwned = 0;
+    uint counter = 0;
+
+    for(uint i = 0; i < totalItems; i++) {
+      if(MarketItems[i+1].owner == msg.sender) {
+        itemsOwned += 1;
+      }
+    }
+
+    MarketItem[] memory items = new MarketItem[](itemsOwned);
+    
+    for (uint i = 0; i < totalItems; i++) {
+      // Check if the seller is the owner
+      if(MarketItems[i+1].seller == msg.sender){
+        items[counter] = MarketItems[i+1];
+        counter += 1;
+      }
+    }
+
+    return items;
+  }
+
+  function resellToken(uint256 tokenId, uint256 price) public payable {
+    require(MarketItems[tokenId].owner == msg.sender, "Only item owner can perform this operation");
+    require(msg.value == listingPrice, "Listing Fee must be equal to listing price");
+    // Reset status
+    MarketItems[tokenId].sold = false;
+    MarketItems[tokenId].price = price;
+    MarketItems[tokenId].seller = payable(msg.sender);
+    // Transfer the NFT listing ownership to marketplace temporarily, transger to buyer later
+    MarketItems[tokenId].owner = payable(address(this));
+
+    _itemsSold.decrement();
+
+    // Transfer the NFT token Id to Marketplace temporarily
+    _transfer(msg.sender, address(this), tokenId);
+  }
 }
