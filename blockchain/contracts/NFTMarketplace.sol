@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 // ERC721URIStorage is extension of ERC721 with storage based token URI management
-contract NFT is ERC721URIStorage {
+contract NFTMarketplace is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenId;
     Counters.Counter private _itemsSold;
@@ -49,7 +49,7 @@ contract NFT is ERC721URIStorage {
         _safeMint(msg.sender, newTokenId);
         // Set token URI for the minted token
         _setTokenURI(newTokenId, tokenURI);
-        // List the NFT token to Marketplace
+        // Auto list the NFT token to Marketplace
         createMarketItem(newTokenId, price);
         return newTokenId;
     }
@@ -191,5 +191,9 @@ contract NFT is ERC721URIStorage {
 
     // Transfer the NFT token Id to Marketplace temporarily
     _transfer(msg.sender, address(this), tokenId);
+  }
+
+  function getListingPrice() public view returns(uint) {
+    return listingPrice;
   }
 }
