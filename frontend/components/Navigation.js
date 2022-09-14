@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 export default function Navigation() {
-  const [toggle, setToggle] = useState(false);
+  const [toggle, setToggle] = useState(true);
   const toggleTrig = () => {
     setToggle(!toggle);
   };
@@ -16,7 +16,7 @@ export default function Navigation() {
             alt="Meme yard Logo"
           ></img>
           <span class="self-center text-xl font-semibold whitespace-nowrap">
-            Meme Yard
+            NFT Yard
           </span>
         </a>
         <button
@@ -43,7 +43,11 @@ export default function Navigation() {
           </svg>
         </button>
         <div
-          class={toggle ? "hidden" : "w-full md:block md:w-auto"}
+          class={
+            toggle
+              ? "hidden w-full md:block md:w-auto"
+              : "w-full md:block md:w-auto"
+          }
           id="navbar-default"
         >
           <ul class="flex flex-col p-4 mt-4  rounded-lg border border-gray-100 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 ">
