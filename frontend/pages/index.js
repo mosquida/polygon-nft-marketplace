@@ -82,10 +82,10 @@ export default function Home() {
     await transaction.wait();
     fetchNFTItems();
   }
+  console.log(loading, NFTitems);
 
   // Return if no NFT loaded
-  if (!loading) {
-    console.log(loading, NFTitems);
+  if (NFTitems.length === 0) {
     return (
       <div
         className="flex justify-center items-center"
@@ -95,6 +95,7 @@ export default function Home() {
       </div>
     );
   }
+
   return (
     <>
       <h1 className="text-3xl font-bold underline"></h1>
