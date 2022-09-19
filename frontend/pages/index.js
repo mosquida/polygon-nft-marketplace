@@ -25,39 +25,38 @@ export default function Home() {
     );
     // Call contract function, Fetch unsold items
     let items = await NFTMarketplaceContract.getMarketItems();
+    console.log(items);
     // Format the data
-    items = await Promise.all(
-      items.map(async (item) => {
-        // Get token URI given token id
-        const tokenURI = await NFTMarketplaceContract.tokenURI(item.id);
-        // Get JSON metadata given URI from IPFS or REST API
-        const meta = await axios.get(tokenURI);
-        // Transform price format to decimal
-        const price = await ethers.utils.formatUnits(
-          item.price.toString(),
-          "ether"
-        );
+    items = await items.map(async (item) => {
+      // Get token URI given token id
+      const tokenURI = await NFTMarketplaceContract.tokenURI(item.id);
+      // Get JSON metadata given URI from IPFS or REST API
+      const meta = await axios.get(tokenURI);
+      console.log(meta);
+      // Transform price format to decimal
+      const price = await ethers.utils.formatUnits(
+        item.price.toString(),
+        "ether"
+      );
 
-        // Return each index content
-        return {
-          id: item.id.toString(),
-          owner: item.owner,
-          seller: item.seller,
-          price,
-          name: meta.data.name,
-          description: meta.data.description,
-          image: meta.data.image,
-        };
-      })
-    );
-
+      // Return each index content
+      return {
+        id: item.id.toString(),
+        owner: item.owner,
+        seller: item.seller,
+        price,
+        name: meta.data.name,
+        description: meta.data.description,
+        image: meta.data.image,
+      };
+    });
+    console.log(items);
     setNFTitems(items);
     setLoading(false);
   }
 
   async function buyNFT(nft) {
     // CONNECT TO WALLET via Web3Modal
-
     const web3Modal = new Web3Modal();
     // Create a web3 instance connection
     const conn = await web3Modal.connect();
@@ -82,7 +81,6 @@ export default function Home() {
     await transaction.wait();
     fetchNFTItems();
   }
-  console.log(loading, NFTitems);
 
   // Return if no NFT loaded
   if (NFTitems.length === 0) {
